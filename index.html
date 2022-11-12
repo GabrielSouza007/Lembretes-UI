@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Lembretes </title>
+    <!-- inserir o jOuery e o ¡Query UI-->
+    <link rel="stylesheet" href="jquery-ui.css">
+    <!-- ‹link rel="stylesheet" href="/resources/demos/style.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="shortcut icon" href="images/equipe.png" />
+
+    <!-- Estilos próprios -->
+    <style>
+        #container {
+            width: 70%;
+            height: 100%;
+            margin: auto;
+            margin-top: 30px;
+            border: 1px solid rgb(26,113,119);
+            margin-bottom: 30px;
+            padding: 8px;
+        }
+
+        h2 {
+            color: rgb(26, 113, 119);
+            text-align: center;
+            font-family: Georgia,'Times New Roman', Times, serif;
+        }
+
+        #lembretes {
+            width: 80%;
+            height: 400px;
+            margin: 5px auto;
+            border: 1px solid rgb(26, 113, 119);
+        }
+
+        ol li {
+            border: 1px solid rgb(26, 113, 119);
+            cursor: pointer;
+            padding: 5px;
+            margin-bottom: 6px;
+        }
+
+        ol li:hover {
+            background: rgb(170, 160, 160);
+        }
+
+        #btnAddCategoria {
+            margin-left: 90px;
+            margin-bottom: 3px;
+        }
+
+        #btnAddLembrete {
+            margin: 3px 90px;
+        }
+
+        .ui-icon-close {
+            transform: scale(1.5);
+            cursor: pointer;
+        }
+
+        .icon-position{
+            padding: 0 10px;
+            line-height: 35px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            $("input[type=checkbox]").removeAttr("checked");
+            $("#lembretes").tabs(); 
+            $("ul").sortable({ axis: "x", containment: "#lembretes" });
+            $("ol").sortable({ axis: "y",containment: "#lembretes" });
+            $("#lembretes").on("click","input[type=checkbox]", function () {
+                $(this).closest("li").slideUp(function () {
+                    $(this).remove();
+                });
+            });
+
+            $("#lembretes").on("click", "span.fa-solid.fa-xmark", function () {
+                var index = $(this).closest("li").index();
+                var id = $("#main li:eq(" + index + ") a").attr("href");
+                $("#main li:eq(" + index + ")").remove(); 
+                $(id).remove();
+                $("#lembretes").tabs("refresh");
+            });
+        
+
+        $("#btnAddLembrete").button()
+            .click(function () {
+                $("#lembretes-dialog").dialog({
+                    width: 400, resizable: false, modal: true,
+                    buttons: {
+                        "Adicionar Lembrete": function () {
+                            $('#lembretes').tabs("refresh");
+                            var activeTab = $("#lembretes").tabs("option", "active");
+                            //alert(activeTab); 
+                            var titulo = $("#main > li:nth-child(" + (activeTab + 1) + ") >a").attr("href");
+                            //alert(titulo); 
+                            $("#lembretes " + titulo).append("<li><input type='checkbox'>" + $("#novo-lembrete").val() + "</li>");
+                            $("#novo-lembrete").val("");
+                            //$("novo-lembrete").val(""); 
+                            $(this).dialog("close");
+                        },
+                        "Cancelar": function () {
+                            $("novo-lembrete").val("");
+                            $(this).dialog("close");
+                        },
+                    
+             }
+                  });
+            })
+            ;
+
+        $("#btnAddCategoria").button()
+            .click(function () {
+                $("#categoria-dialog").dialog({
+                    width: 400, resizable: false, modal: true,
+                    buttons: {
+                        "Adicionar categoria": function () {
+                            var categoriaNome = $("#nova-categoria").val();
+                            var replaceName = categoriaNome.split("").join("_");
+                            $("<li><a href='#" + replaceName + "' > " + categoriaNome + "</a > <span class='fa-solid fa-xmark icon-position'></span></li > ")
+                                .appendTo("#main");
+                            $("<ol id='" + replaceName + "'></ol>").appendTo("#lembretes").sortable();
+                            $("#lembretes").tabs("refresh"); var tabCount = $("#lembretes .ui-tabs-nav li").length;
+                            $("#lembretes").tabs("option", "active", tabCount - 1);
+
+                            $("#nova-categoria").val("");
+                            $(this).dialog("close");
+
+                        },
+                        "Cancelar": function () {
+                            $("nova-categoria").val(""); $(this).dialog("close");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="container">
+        <h2> Lembretes </h2>
+        <button id="btnAddCategoria">Categoria</button>
+        <div id="lembretes">
+            <ul id="main">
+                <li><a href="#pessoal">Pessoal</a><span class="fa-solid fa-xmark icon-position"></span></li>
+                <li><a href="#escola">Escola</a><span class="fa-solid fa-xmark icon-position"></span></li>
+            </ul>
+            <ol id="pessoal">
+                <li><input type="checkbox"> Ir ao médico </li>
+                <li><input type="checkbox"> Limpar a casa </li>
+            </ol>
+            <ol id="escola">
+                <li><input type="checkbox"> Fazer lição de matemática</li>
+                <li><input type="checkbox"> Fazer lição de Arte e Design</li>
+            </ol>
+        </div>
+        <button id="btnAddLembrete">Lembrete</button>
+        <div id="categoria-dialog" title="Adicionar categoria" style="display:none;">
+            <label for="nova-categoria">Nome Categoria: </label>
+            <input id="nova-categoria" type="text" />
+        </div>
+        <div id="lembretes-dialog" title="Adicionar Lembrete" style="display:none;">
+            <label for="novo-lembrete">Novo Lembrete:</label>
+            <input id="novo-lembrete" type="text" />
+        </div>
+    </div>
+</body>
+</html>
